@@ -1,6 +1,6 @@
 # gpt4free-proxy
 
-> **Nota:** A versão em inglês deste README está [mais abaixo](#english).
+> **Note:** The English version of this README is [further below](#english).
 
 Proxy leve de LLM inspirado no [n8n-g4f-proxy](https://github.com/korotovsky/n8n-g4f-proxy) (korotovsky). Expõe backends no estilo Gpt4Free como um endpoint **compatível com a API OpenAI**, para integrar inferência gratuita em fluxos n8n, agentes locais ou qualquer cliente que fale o formato da API OpenAI.
 
