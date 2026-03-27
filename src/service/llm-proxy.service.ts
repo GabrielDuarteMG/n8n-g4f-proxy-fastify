@@ -50,9 +50,15 @@ export async function postResponsesAsChatCompletion(
   input: unknown
 ): Promise<ResponseObject> {
   const jsonBody = { ...body, messages: input, provider };
-  const upstream_res = await upstreamKy.post<ChatCompletion>(`${upstream}/v1/chat/completions`, {
-    json: jsonBody,
-    headers: { ...(authorization ? { authorization } : {}) },
-  });
-  return parseToResponse(await upstream_res.json());
+  try {
+    const upstream_res = await upstreamKy.post<ChatCompletion>(`${upstream}/v1/chat/completions`, {
+      json: jsonBody,
+      headers: { ...(authorization ? { authorization } : {}) },
+    });
+    const json = await upstream_res.json();
+    return parseToResponse(json);
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
 }

@@ -7,6 +7,7 @@ import {
   postResponsesAsChatCompletion,
   proxyChatCompletions,
 } from "../service/llm-proxy.service";
+import { shouldEnableWebSearch } from "../utils/web-search.utils";
 
 export function registerLlmRoutes(app: FastifyInstance): void {
   app.get("/v1/models", async (req, reply) => {
@@ -40,7 +41,12 @@ export function registerLlmRoutes(app: FastifyInstance): void {
 
   app.post("/v1/chat/completions", async (req, reply) => {
     const auth = (req.headers["authorization"] as string) ?? null;
-    const body = { ...(req.body as object), provider: getProvider() };
+    const requestBody = req.body as Record<string, unknown>;
+    const body: Record<string, unknown> = { ...requestBody, provider: getProvider() };
+
+    if (shouldEnableWebSearch(requestBody.messages)) {
+      body.web_search = true;
+    }
 
     const upstream_res = await proxyChatCompletions(auth, body as Record<string, unknown>);
 
@@ -55,10 +61,17 @@ export function registerLlmRoutes(app: FastifyInstance): void {
 
   app.post("/v1/responses", async (req, reply) => {
     const auth = (req.headers["authorization"] as string) ?? null;
+    const requestBody = req.body as Record<string, unknown>;
+    const body: Record<string, unknown> = { ...requestBody };
+
+    if (shouldEnableWebSearch(requestBody.input)) {
+      body.web_search = true;
+    }
+
     const output = await postResponsesAsChatCompletion(
       auth,
-      req.body as Record<string, unknown>,
-      (req.body as any).input
+      body,
+      requestBody.input
     );
     return reply.send(output);
   });
