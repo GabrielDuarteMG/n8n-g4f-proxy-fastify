@@ -7,6 +7,7 @@ export function createApp() {
     logger: true,
     requestTimeout: REQUEST_TIMEOUT_MS,
   });
+  app.get("/health", async () => ({ status: "ok" }));
   registerLlmRoutes(app);
   return app;
 }
