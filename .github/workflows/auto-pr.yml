@@ -1,0 +1,46 @@
+# Abre automaticamente um PR para `main` quando há push em ramos de trabalho.
+# Ramos: cursor/**, feature/**, fix/**
+#
+# Requer permissões do GITHUB_TOKEN para criar PRs (pull-requests: write).
+
+name: Auto PR to main
+
+on:
+  push:
+    branches:
+      - "cursor/**"
+      - "feature/**"
+      - "fix/**"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  open-pull-request:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Criar PR se ainda não existir
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          HEAD="${GITHUB_REF_NAME}"
+          BASE="main"
+
+          count=$(gh pr list --repo "${GITHUB_REPOSITORY}" --base "${BASE}" --head "${HEAD}" --json number --jq 'length')
+          if [ "${count}" != "0" ]; then
+            echo "Já existe PR aberto de ${HEAD} para ${BASE}; nada a fazer."
+            exit 0
+          fi
+
+          gh pr create \
+            --repo "${GITHUB_REPOSITORY}" \
+            --base "${BASE}" \
+            --head "${HEAD}" \
+            --title "Merge ${HEAD} into ${BASE}" \
+            --body "Pull request criado automaticamente após push em \`${HEAD}\`.
+
+            - Commit: \`${GITHUB_SHA}\`
+            - Workflow: [\`${GITHUB_WORKFLOW}\`](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
