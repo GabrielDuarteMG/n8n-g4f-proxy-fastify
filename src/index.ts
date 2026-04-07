@@ -1,11 +1,9 @@
-import dotenv from "dotenv";
+import "./env.js";
+import { createApp } from "./app.js";
 
-dotenv.config();
-
-const { createApp } = await import("./app.js");
-
+const port = Number(process.env.PORT ?? "12343");
 const app = createApp();
-app.listen({ port: 12343, host: "0.0.0.0" }, (err, address) => {
+app.listen({ port, host: "0.0.0.0" }, (err, address) => {
   if (err) {
     console.error(err);
     process.exit(1);
