@@ -1,5 +1,6 @@
 import "./env.js";
-import { createApp } from "./app.js";
+
+const { createApp } = await import("./app.js");
 
 const port = Number(process.env.PORT ?? "12343");
 const app = createApp();
